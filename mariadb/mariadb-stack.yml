@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  mariadb1:
+    image: bitnami/mariadb-galera:latest
+    environment:
+      - MARIADB_ROOT_PASSWORD=rootpassword
+      - MARIADB_USER=wordpress
+      - MARIADB_PASSWORD=wordpresspassword
+      - MARIADB_DATABASE=wordpress
+      - MARIADB_GALERA_CLUSTER_NAME=my_galera_cluster
+      - MARIADB_GALERA_NODE_NAME=mariadb1
+      - MARIADB_GALERA_NODE_ADDRESS=mariadb1
+      - MARIADB_GALERA_CLUSTER_BOOTSTRAP=yes
+      - MARIADB_GALERA_MARIABACKUP_PASSWORD=mybackup_password
+    volumes:
+      - db_data1:/bitnami/mariadb
+    networks:
+      - internal-network
+
+  mariadb2:
+    image: bitnami/mariadb-galera:latest
+    environment:
+      - MARIADB_ROOT_PASSWORD=rootpassword
+      - MARIADB_USER=wordpress
+      - MARIADB_PASSWORD=wordpresspassword
+      - MARIADB_DATABASE=wordpress
+      - MARIADB_GALERA_CLUSTER_NAME=my_galera_cluster
+      - MARIADB_GALERA_NODE_NAME=mariadb2
+      - MARIADB_GALERA_NODE_ADDRESS=mariadb2
+      - MARIADB_GALERA_MARIABACKUP_PASSWORD=mybackup_password
+      - MARIADB_GALERA_PRIMARY_NODE=mariadb1
+    volumes:
+      - db_data2:/bitnami/mariadb
+    networks:
+      - internal-network
+
+  mariadb3:
+    image: bitnami/mariadb-galera:latest
+    environment:
+      - MARIADB_ROOT_PASSWORD=rootpassword
+      - MARIADB_USER=wordpress
+      - MARIADB_PASSWORD=wordpresspassword
+      - MARIADB_DATABASE=wordpress
+      - MARIADB_GALERA_CLUSTER_NAME=my_galera_cluster
+      - MARIADB_GALERA_NODE_NAME=mariadb3
+      - MARIADB_GALERA_NODE_ADDRESS=mariadb3
+      - MARIADB_GALERA_MARIABACKUP_PASSWORD=mybackup_password
+      - MARIADB_GALERA_PRIMARY_NODE=mariadb1
+    volumes:
+      - db_data3:/bitnami/mariadb
+    networks:
+      - internal-network
+
+networks:
+   internal-network:
+    external: true
+
+volumes:
+  db_data1:
+  db_data2:
+  db_data3:
+
