@@ -1,0 +1,8 @@
+- name: Template the iptables rules file
+  template:
+    src: iptables.j2
+    dest: /etc/iptables/rules.v4
+    mode: '0644'
+
+- name: Apply the iptables rules
+  shell: iptables-restore < /etc/iptables/rules.v4

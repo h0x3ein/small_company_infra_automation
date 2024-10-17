@@ -1,0 +1,60 @@
+---
+# Task 1: Check if Docker is already installed
+- name: Check Docker installation
+  ignore_errors: true
+  register: result
+  shell: which docker
+
+
+# Step 2: Install required system packages
+- name: Install prerequisite packages
+  when: result.rc != 0
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  loop:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - software-properties-common
+
+# Step 3: Add Docker's official GPG key
+- name: Add Docker GPG apt Key
+  when: result.rc != 0
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+# Step 4: Add Docker APT repository
+- name: Add Docker repository
+  when: result.rc != 0
+  apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu focal stable
+    state: present
+
+# Step 5: Update the apt package index
+- name: Update apt package index
+  when: result.rc != 0
+  apt:
+    update_cache: yes
+
+# Step 6: Install Docker and Docker Compose
+- name: Install Docker and Docker Compose
+  when: result.rc != 0
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-compose-plugin
+    state: latest
+  notify: Ensure Docker is running
+
+- name: Add the SSH user to the docker group
+  when: result.rc != 0
+  user:
+    name: "{{ ansible_ssh_user }}"
+    groups: docker
+    append: yes
+    state: present

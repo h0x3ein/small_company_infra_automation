@@ -1,0 +1,15 @@
+---
+- name: Initial configuration
+  import_tasks: initial_config.yml
+  tags: initial_config
+
+- name: Install usefull packages
+  import_tasks: packages.yml
+  tags: install_package
+
+- name: Config IpTables
+  import_tasks: iptables.yml
+  tags: iptables
+
+
+  

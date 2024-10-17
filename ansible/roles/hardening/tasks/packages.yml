@@ -1,0 +1,16 @@
+---
+- name: Install multiple packages using apt with loop
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - curl
+    - vim
+    - git
+    - fail2ban
+    - lynis
+    - iptables-persistent
+    - ntp
+    - apt-listchanges
+    - auditd
+    - libpam-pwquality

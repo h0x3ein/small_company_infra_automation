@@ -1,0 +1,35 @@
+---
+# 1. Add your SSH public key to the user's authorized_keys
+- name: Add public key to user's authorized_keys
+  authorized_key:
+    user: "{{ ansible_ssh_user }}"
+    state: present
+    key: "{{ lookup('file', '/home/ho3ein/.ssh/id_rsa.pub') }}"
+
+# 2. Configure passwordless sudo for the user
+- name: Allow "{{ ansible_ssh_user }}" user to run sudo without a password
+  lineinfile:
+    path: /etc/sudoers
+    regexp: '^{{ ansible_ssh_user }}'
+    line: '{{ ansible_ssh_user }} ALL=(ALL) NOPASSWD:ALL'
+    state: present
+    backup: yes
+
+
+# 3. Update the system (optional, can be resource-heavy depending on packages)
+- name: Update apt cache on Debian/Ubuntu systems
+  apt:
+    update_cache: yes
+  when: ansible_os_family == "Debian"
+
+- name: Ensure yum cache is up-to-date on CentOS/RedHat systems
+  yum:
+    name: "*"
+    state: latest
+  when: ansible_os_family == "RedHat"
+  
+# 4. check ufw uninstalle 
+- name: Remove ufw service if exists
+  package:
+    name: ufw
+    state: absent

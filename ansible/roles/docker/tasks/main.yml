@@ -1,0 +1,8 @@
+---
+# - name: check and Install docker 
+#   import_tasks: iran.yml
+#   tags: iran
+
+- name: check and Install docker 
+  import_tasks: installation.yml
+  tags: docker 
