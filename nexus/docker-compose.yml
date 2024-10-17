@@ -1,0 +1,49 @@
+version: '3.8'
+
+networks:
+  web_net:
+    name: web_net
+    external: true
+
+volumes:
+  nexus_data:
+    name: nexus_data
+
+services:
+  nexus:
+    image: sonatype/nexus3:3.70.0
+    container_name: nexus
+    hostname: nexus-repo-server
+    restart: always
+    volumes:
+      - nexus_data:/nexus-data
+    networks:
+      - web_net
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=web_net
+
+      - traefik.http.routers.repo.entrypoints=web
+      - traefik.http.routers.repo.rule=Host(`repo.blog.zerops.ir`)
+      - traefik.http.routers.repo.service=repo-secure
+
+      - traefik.http.routers.repo.middlewares=redirect-to-https
+      - traefik.http.routers.repo-secure.entrypoints=secure
+      - traefik.http.routers.repo-secure.rule=Host(`repo.blog.zerops.ir`)
+      - traefik.http.routers.repo-secure.tls=true
+      - traefik.http.routers.repo-secure.tls.options=default
+      - traefik.http.routers.repo-secure.service=repo-secure
+      - traefik.http.routers.repo-secure.tls.certresolver=mycert
+      - traefik.http.services.repo-secure.loadbalancer.server.port=8081
+
+      - traefik.http.routers.hubdocker.entrypoints=web
+      - traefik.http.routers.hubdocker.rule=Host(`hub.blog.zerops.ir`)
+      - traefik.http.routers.hubdocker.middlewares=redirect-to-https
+      - traefik.http.routers.hubdocker-secure.entrypoints=secure
+      - traefik.http.routers.hubdocker.service=hubdocker-secure
+      - traefik.http.routers.hubdocker-secure.rule=Host(`hub.blog.zerops.ir`)
+      - traefik.http.routers.hubdocker-secure.tls=true
+      - traefik.http.routers.hubdocker-secure.tls.options=default
+      - traefik.http.routers.hubdocker-secure.service=hubdocker-secure
+      - traefik.http.routers.hubdocker-secure.tls.certresolver=mycert
+      - traefik.http.services.hubdocker-secure.loadbalancer.server.port=9091

@@ -11,8 +11,8 @@ deploy_stacks() {
     echo "Deploying MariaDB Galera stack..."
     docker stack deploy -c ./mariadb/mariadb-stack.yml mariadb 
 
-    #echo "Deploying Nexus stack..."
-    #docker stack deploy -c ./nexus/docker-compose.yml nexus 
+    echo "Deploying Nexus stack..."
+    docker stack deploy -c ./nexus/docker-compose.yml nexus 
 
     echo "Deploying PostgreSQL (pgpool) stack..."
     docker stack deploy -c ./postgres/pgpool-stack.yml postgres 
