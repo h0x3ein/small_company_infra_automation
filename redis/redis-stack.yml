@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+  redis-master:
+    image: redis:latest
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./redis-master.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - internal-network
+    deploy:
+      replicas: 1
+    environment:
+      - REDIS_REPLICATION_MODE=master
+
+  redis-slave:
+    image: redis:latest
+    command: redis-server --slaveof redis-master 6379
+    depends_on:
+      - redis-master
+    networks:
+      - internal-network
+    deploy:
+      replicas: 2  # You can run multiple replicas
+    environment:
+      - REDIS_REPLICATION_MODE=slave
+      - REDIS_MASTER_HOST=redis-master
+      - REDIS_MASTER_PORT=6379
+
+  sentinel:
+    image: bitnami/redis-sentinel:latest
+    environment:
+      - REDIS_SENTINEL_QUORUM=2
+      - REDIS_SENTINEL_DOWN_AFTER=5000
+      - REDIS_SENTINEL_FAILOVER=5000
+      - REDIS_MASTER_NAME=redis-master
+    networks:
+      - internal-network
+    deploy:
+      replicas: 3  # Three Sentinel instances for quorum
+
+networks:
+  internal-network:
+    external: true

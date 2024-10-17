@@ -6,7 +6,7 @@ volumes:
 
 services:
   traefik:
-    image: traefik:v3.1
+    image: traefik:v2.10
     container_name: traefik
     deploy:
       mode: global
@@ -16,9 +16,7 @@ services:
       - "--api.insecure=true"                             # Enable insecure dashboard
       - "--providers.docker=true"                         # Enable Docker provider
       - "--entrypoints.web.address=:80"                   # HTTP Entry Point
-      - "--entrypoints.websecure.address=:443"            # HTTPS Entry Point
-      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"   # Redirect HTTP to HTTPS
-      - "--entryPoints.web.http.redirections.entrypoint.scheme=https"   # Set HTTPS scheme
+      - "--entrypoints.secure.address=:443"               # HTTPS Entry Point
       - "--certificatesresolvers.mycert.acme.email=cert@mecan.ir"
       - "--certificatesresolvers.mycert.acme.storage=/acme/acme.json"
       - "--certificatesresolvers.mycert.acme.tlschallenge=true"
@@ -31,15 +29,21 @@ services:
     networks:
       - web_net
     labels:
-      # Enable HTTPS for dashboard.blog.zerops.ir
+      # Enable HTTP for dashboard.blog.zerops.ir
       - "traefik.enable=true"
       - "traefik.docker.network=web_net"
-      - "traefik.http.routers.dashboard.rule=Host(`dashboard.blog.zerops.ir`)"
-      - "traefik.http.routers.dashboard.entrypoints=websecure"
-      - "traefik.http.routers.dashboard.tls=true"
-      - "traefik.http.routers.dashboard.tls.certresolver=mycert"
+      - "traefik.http.routers.dashboard-http.rule=Host(`dashboard.blog.zerops.ir`)"
+      - "traefik.http.routers.dashboard-http.entrypoints=web"
       - "traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080"
+
+      # Enable HTTPS and redirection for dashboard.blog.zerops.ir
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.dashboard-https.rule=Host(`dashboard.blog.zerops.ir`)"
+      - "traefik.http.routers.dashboard-https.entrypoints=secure"
+      - "traefik.http.routers.dashboard-https.tls=true"
+      - "traefik.http.routers.dashboard-https.tls.certresolver=mycert"
 
 networks:
   web_net:
     external: true
+
