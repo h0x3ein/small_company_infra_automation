@@ -1,0 +1,80 @@
+version: '3.9'
+
+services:
+  vote:
+    image: h0x3ein/examplevotingapp_vote
+    networks:
+      - internal-network  # Single internal network to manage both Redis and PostgreSQL connections
+      - web_net           # Traefik network to route traffic
+    environment:
+      - POSTGRES_HOST=db  # PGPool as the load balancer for PostgreSQL
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=adminpassword  # Consistent with other configs
+      - POSTGRES_DB=voting_app
+      # Removed unnecessary `REDIS_PASSWORD`
+    deploy:
+      replicas: 1
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=web_net
+      - traefik.http.routers.vote.rule=Host(`vote.blog.zerops.ir`)
+      - traefik.http.routers.vote.entrypoints=web
+      - traefik.http.routers.vote.service=vote-secure-service
+      - traefik.http.services.vote-secure-service.loadbalancer.server.port=80
+
+      - traefik.http.routers.vote.middlewares=redirect-to-https
+      - traefik.http.routers.vote-secure.entrypoints=secure
+      - traefik.http.routers.vote-secure.rule=Host(`vote.blog.zerops.ir`)
+      - traefik.http.routers.vote-secure.tls=true
+      - traefik.http.routers.vote-secure.tls.options=default
+      - traefik.http.routers.vote-secure.service=vote-secure-service
+      - traefik.http.routers.vote-secure.tls.certresolver=mycert
+
+  result:
+    image: h0x3ein/examplevotingapp_result
+    networks:
+      - internal-network  # Connecting to Redis and PostgreSQL via the internal network
+      - web_net           # Adding Traefik network for routing
+    environment:
+      - POSTGRES_HOST=db  # PGPool as the load balancer for PostgreSQL
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=adminpassword  # Consistent with other configs
+      - POSTGRES_DB=voting_app
+    deploy:
+      replicas: 1
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=web_net
+      - traefik.http.routers.result.rule=Host(`result.blog.zerops.ir`)
+      - traefik.http.routers.result.entrypoints=web
+      - traefik.http.routers.result.service=result-secure-service
+      - traefik.http.services.result-secure-service.loadbalancer.server.port=80
+
+      - traefik.http.routers.result.middlewares=redirect-to-https
+      - traefik.http.routers.result-secure.entrypoints=secure
+      - traefik.http.routers.result-secure.rule=Host(`result.blog.zerops.ir`)
+      - traefik.http.routers.result-secure.tls=true
+      - traefik.http.routers.result-secure.tls.options=default
+      - traefik.http.routers.result-secure.service=result-secure-service
+      - traefik.http.routers.result-secure.tls.certresolver=mycert
+
+  worker:
+    image: h0x3ein/examplevotingapp_worker
+    networks:
+      - internal-network  # Connecting to Redis and PostgreSQL via the internal network
+    environment:
+      - POSTGRES_HOST=db  # PGPool as the load balancer for PostgreSQL
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=adminpassword  # Consistent with other configs
+      - POSTGRES_DB=voting_app
+    deploy:
+      replicas: 1
+
+networks:
+  internal-network:  # Single internal network for Redis and PostgreSQL clustering
+    external: true
+  web_net:
+    external: true
