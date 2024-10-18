@@ -7,9 +7,16 @@
   import_tasks: packages.yml
   tags: install_package
 
+- name: config ssh
+  import_tasks: ssh.yml
+  tags: ssh, hardening
+
 - name: Config IpTables
   import_tasks: iptables.yml
   tags: iptables
 
+- name: Include sysctl tasks
+  import_tasks: sysctl.yml
+  tags: sysctl
 
   

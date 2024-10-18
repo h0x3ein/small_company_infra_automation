@@ -1,0 +1,9 @@
+---
+- name: Add ArvanCloud repository to the sources list
+  template:
+    src: iran.j2
+    dest: /etc/apt/sources.list
+
+- name: Update the apt cache
+  apt:
+    update_cache: yes
