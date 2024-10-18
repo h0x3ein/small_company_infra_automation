@@ -1,0 +1,10 @@
+http:
+  middlewares:
+    redirect-https-www:
+      redirectRegex:
+        regex: "^https?://www\\.(.+)"
+        replacement: "https://${1}"
+        permanent: true
+    hsts-headers:
+      headers:
+        stsSeconds: 63072000
