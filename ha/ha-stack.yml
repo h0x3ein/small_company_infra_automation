@@ -5,6 +5,9 @@ services:
     image: haproxy:latest
     deploy:
       mode: replicated
+      placement:
+        constraints:
+          - node.role == manager 
       replicas: 1  # Increase for high availability
       restart_policy:
         condition: on-failure
@@ -24,7 +27,7 @@ services:
       - traefik.http.routers.haproxy-stats-http.rule=Host(`ha.blog.zerops.ir`)
       - traefik.http.routers.haproxy-stats-http.entrypoints=web
       - traefik.http.routers.haproxy-stats-http.middlewares=redirect-to-https
-      - traefik.http.services.haproxy-stats.loadbalancer.server.port=8080
+      - traefik.http.services.haproxy-stats.loadbalancer.server.port=8081
 
       # HTTPS routing for HAProxy stats (Traefik)
       - traefik.http.routers.haproxy-stats-https.rule=Host(`ha.blog.zerops.ir`)

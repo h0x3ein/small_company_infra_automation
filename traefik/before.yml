@@ -1,42 +1,33 @@
+version: '3.7'
+
+volumes:
+  traefik-acme:
+    name: traefik-acme
+
 services:
   traefik:
     image: traefik:v3.0
-    hostname: traefik
     command:
       - "--log.level=DEBUG"
-      - "--log.filepath=/log-file.log"
-      - "--log.format=json"
-      - "--api=true"
-      - "--ping=true"
-      - "--accesslog=true"
-      - "--accesslog.fields.names.StartUTC=drop"
-      - "--accesslog.bufferingsize=250"
-      - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
-      - "--providers.swarm.exposedByDefault=false"
-      - "--providers.swarm.network=web_net"
-      - "--api.insecure=true"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.secure.address=:443"
+      - "--api.insecure=true"                             # Enable insecure dashboard
+      - "--providers.docker=true"                         # Enable Docker provider
+      - "--entrypoints.web.address=:80"                   # HTTP Entry Point
+      - "--entrypoints.secure.address=:443"               # HTTPS Entry Point
       - "--certificatesresolvers.mycert.acme.email=cert@mecan.ir"
       - "--certificatesresolvers.mycert.acme.storage=/acme/acme.json"
       - "--certificatesresolvers.mycert.acme.tlschallenge=true"
+      - --providers.docker.network=web_net
+    
     ports:
-      - "80:80"
-      - "443:443"
+      - "80:80"       # HTTP port
+      - "443:443"     # HTTPS port
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - traefik-acme:/acme
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"    # Docker socket
+      - "traefik-acme:/acme"
     networks:
       - web_net
-    dns:
-      - 4.2.2.4
-    deploy:
-      replicas: 1
-      placement:
-        constraints:
-          - node.labels.traefik-public.traefik-public-certificates == true
-      labels:
-      # Enable HTTP for dashboard.blog.zerops.ir
+    labels:
+    # Enable HTTP for dashboard.blog.zerops.ir
       - "traefik.enable=true"
       - "traefik.docker.network=web_net"
       - "traefik.http.routers.dashboard-http.rule=Host(`dashboard.blog.zerops.ir`)"
@@ -51,13 +42,6 @@ services:
       - "traefik.http.routers.dashboard-https.tls=true"
       - "traefik.http.routers.dashboard-https.tls.certresolver=mycert"
 
-  
-        
-
 networks:
   web_net:
     external: true
-
-volumes:
-  traefik-acme:
-    name: traefik-acme

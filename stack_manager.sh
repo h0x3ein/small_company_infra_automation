@@ -1,9 +1,30 @@
 #!/bin/bash
 
+# Function to check and create networks if not exists
+create_networks() {
+    # Check if internal-network exists, if not create it
+    if ! docker network ls --filter name=^internal-network$ --format="{{ .Name }}" | grep -w "internal-network" &> /dev/null; then
+        echo "Creating internal-network..."
+        docker network create --driver overlay internal-network
+    else
+        echo "internal-network already exists."
+    fi
+
+    # Check if web_net exists, if not create it
+    if ! docker network ls --filter name=^web_net$ --format="{{ .Name }}" | grep -w "web_net" &> /dev/null; then
+        echo "Creating web_net..."
+        docker network create --driver overlay web_net
+    else
+        echo "web_net already exists."
+    fi
+}
+
 # Function to deploy all stacks
 deploy_stacks() {
+    create_networks  # Ensure networks exist before deploying stacks
+
     echo "Deploying Traefik stack..."
-    docker stack deploy -c ./traefik/docker-compose.yml traefik 
+    docker stack deploy -c ./traefik/before.yml traefik 
 
     echo "Deploying HAProxy stack..."
     docker stack deploy -c ./ha/ha-stack.yml haproxy 
@@ -11,8 +32,8 @@ deploy_stacks() {
     echo "Deploying MariaDB Galera stack..."
     docker stack deploy -c ./mariadb/mariadb-stack.yml mariadb 
 
-    echo "Deploying Nexus stack..."
-    docker stack deploy -c ./nexus/docker-compose.yml nexus 
+    #echo "Deploying Nexus stack..."
+    #docker stack deploy -c ./nexus/docker-compose.yml nexus 
 
     echo "Deploying PostgreSQL (pgpool) stack..."
     docker stack deploy -c ./postgres/pgpool-stack.yml postgres 
