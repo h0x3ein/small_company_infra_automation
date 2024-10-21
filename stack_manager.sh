@@ -24,7 +24,7 @@ deploy_stacks() {
     create_networks  # Ensure networks exist before deploying stacks
 
     echo "Deploying Traefik stack..."
-    docker stack deploy -c ./traefik/before.yml traefik 
+    docker stack deploy -c ./traefik/docker-compose.yml traefik 
 
     echo "Deploying HAProxy stack..."
     docker stack deploy -c ./ha/ha-stack.yml haproxy 
@@ -33,7 +33,7 @@ deploy_stacks() {
     docker stack deploy -c ./mariadb/mariadb-stack.yml mariadb 
 
     #echo "Deploying Nexus stack..."
-    #docker stack deploy -c ./nexus/docker-compose.yml nexus 
+    docker stack deploy -c ./nexus/docker-compose.yml nexus 
 
     echo "Deploying PostgreSQL (pgpool) stack..."
     docker stack deploy -c ./postgres/pgpool-stack.yml postgres 

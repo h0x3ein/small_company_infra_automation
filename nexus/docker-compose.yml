@@ -19,31 +19,38 @@ services:
       - nexus_data:/nexus-data
     networks:
       - web_net
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=web_net
+    deploy:
+      labels:
+        # HTTP router for repo.blog.zerops.ir
+        - traefik.enable=true
+        - traefik.docker.network=web_net
+        - traefik.http.routers.repo.rule=Host(`repo.blog.zerops.ir`)
+        - traefik.http.routers.repo.entrypoints=http
+        - traefik.http.routers.repo.service=repo-secure-service
+        - traefik.http.services.repo-secure-service.loadbalancer.server.port=8081
+        
+        # HTTPS router for repo.blog.zerops.ir
+        - traefik.http.routers.repo.middlewares=https-redirect
+        - traefik.http.routers.repo-secure.entrypoints=https
+        - traefik.http.routers.repo-secure.rule=Host(`repo.blog.zerops.ir`)
+        - traefik.http.routers.repo-secure.tls=true
+        - traefik.http.routers.repo-secure.tls.options=default
+        - traefik.http.routers.repo-secure.service=repo-secure-service
+        - traefik.http.routers.repo-secure.tls.certresolver=mycert
 
-      - traefik.http.routers.repo.entrypoints=web
-      - traefik.http.routers.repo.rule=Host(`repo.blog.zerops.ir`)
-      - traefik.http.routers.repo.service=repo-secure
+        # HTTP router for hub.blog.zerops.ir
+        - traefik.http.routers.hub.rule=Host(`hub.blog.zerops.ir`)
+        - traefik.http.routers.hub.entrypoints=http
+        - traefik.http.routers.hub.service=hub-secure-service
+        - traefik.http.services.hub-secure-service.loadbalancer.server.port=9091
 
-      - traefik.http.routers.repo.middlewares=redirect-to-https
-      - traefik.http.routers.repo-secure.entrypoints=secure
-      - traefik.http.routers.repo-secure.rule=Host(`repo.blog.zerops.ir`)
-      - traefik.http.routers.repo-secure.tls=true
-      - traefik.http.routers.repo-secure.tls.options=default
-      - traefik.http.routers.repo-secure.service=repo-secure
-      - traefik.http.routers.repo-secure.tls.certresolver=mycert
-      - traefik.http.services.repo-secure.loadbalancer.server.port=8081
 
-      - traefik.http.routers.hubdocker.entrypoints=web
-      - traefik.http.routers.hubdocker.rule=Host(`hub.blog.zerops.ir`)
-      - traefik.http.routers.hubdocker.middlewares=redirect-to-https
-      - traefik.http.routers.hubdocker-secure.entrypoints=secure
-      - traefik.http.routers.hubdocker.service=hubdocker-secure
-      - traefik.http.routers.hubdocker-secure.rule=Host(`hub.blog.zerops.ir`)
-      - traefik.http.routers.hubdocker-secure.tls=true
-      - traefik.http.routers.hubdocker-secure.tls.options=default
-      - traefik.http.routers.hubdocker-secure.service=hubdocker-secure
-      - traefik.http.routers.hubdocker-secure.tls.certresolver=mycert
-      - traefik.http.services.hubdocker-secure.loadbalancer.server.port=9091
+
+        # HTTPS router for hub.blog.zerops.ir
+        - traefik.http.routers.hub.middlewares=https-redirect
+        - traefik.http.routers.hub-secure.entrypoints=https
+        - traefik.http.routers.hub-secure.rule=Host(`hub.blog.zerops.ir`)
+        - traefik.http.routers.hub-secure.tls=true
+        - traefik.http.routers.hub-secure.tls.options=default
+        - traefik.http.routers.hub-secure.service=hub-secure-service
+        - traefik.http.routers.hub-secure.tls.certresolver=mycert

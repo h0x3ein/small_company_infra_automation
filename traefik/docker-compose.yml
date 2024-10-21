@@ -1,23 +1,41 @@
-version: '3.9'
+networks:
+  web_net:
+    driver: overlay
+    external: true
+
+volumes:
+  traefik-acme:
+    name: traefik-acme
+
 
 services:
   traefik:
     image: traefik:v3.0
+    hostname: traefik
     command:
       - "--log.level=DEBUG"
-      - "--providers.docker=true"
-      # - "--providers.docker.swarmMode=true"
-      # - "--providers.docker.network=web_net"
-      # - "--providers.docker.exposedbydefault=false"
+      - "--log.filepath=/log-file.log"
+      - "--log.format=json"
+      - "--api=true"
+      - "--ping=true"
+      - "--accesslog=true"
+      - "--accesslog.fields.names.StartUTC=drop"
+      - "--accesslog.bufferingsize=250"
       - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
       - "--providers.swarm.exposedByDefault=false"
       - "--providers.swarm.network=web_net"
+        #  - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+        #- "--providers.docker.exposedbydefault=false"
+        #- "--providers.docker.network=web_net"
       - "--api.insecure=true"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.secure.address=:443"
-      - "--certificatesresolvers.mycert.acme.tlschallenge=true"
+      - "--entrypoints.http.address=:80"
+      - "--entrypoints.https.address=:443"
+      - "--metrics.prometheus=true"
+      - "--entryPoints.metrics.address=:8082"
+      - "--metrics.prometheus.entryPoint=metrics"
       - "--certificatesresolvers.mycert.acme.email=cert@mecan.ir"
       - "--certificatesresolvers.mycert.acme.storage=/acme/acme.json"
+      - "--certificatesresolvers.mycert.acme.tlschallenge=true"
     ports:
       - "80:80"
       - "443:443"
@@ -26,33 +44,26 @@ services:
       - traefik-acme:/acme
     networks:
       - web_net
+      
+    dns:
+      - 4.2.2.4
     deploy:
-      mode: 
-        global
-      # placement:
-      #   constraints:
-      #     - node.role == manager
+      replicas: 1
+        # placement:
+        # constraints:
+        # - node.labels.traefik_node == true  # فقط روی نودهایی با لیبل 'traefik_node=true' اجرا شود
       labels:
-      # Enable HTTP for dashboard.blog.zerops.ir
-      - "traefik.enable=true"
-      - "traefik.docker.network=web_net"
-      - "traefik.http.routers.dashboard-http.rule=Host(`dashboard.blog.zerops.ir`)"
-      - "traefik.http.routers.dashboard-http.entrypoints=web"
-      - "traefik.http.routers.dashboard-http.middlewares=redirect-to-https"  # Redirect HTTP to HTTPS
-      - "traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080"
-
-      # Enable HTTPS and redirection for dashboard.blog.zerops.ir
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
-      - "traefik.http.routers.dashboard-https.rule=Host(`dashboard.blog.zerops.ir`)"
-      - "traefik.http.routers.dashboard-https.entrypoints=secure"
-      - "traefik.http.routers.dashboard-https.tls=true"
-      - "traefik.http.routers.dashboard-https.tls.certresolver=mycert"
-
-networks:
-  web_net:
-    external: true
-    name: web_net
-
-volumes:
-  traefik-acme:
-    name: traefik-acme
+        - "traefik.enable=true"
+        - "traefik.docker.network=web_net"
+        - "traefik.http.routers.traefik.entrypoints=http"
+        - "traefik.http.routers.traefik.rule=Host(`dashboard.blog.zerops.ir`)"
+        #- "traefik.http.middlewares.web-auth.basicauth.users=${WEB_AUTH_USER}:${WEB_AUTH_PASS}"
+        - "traefik.http.routers.traefik.middlewares=https-redirect"
+        - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+        - "traefik.http.routers.traefik-secure.entrypoints=https"
+        - "traefik.http.routers.traefik-secure.rule=Host(`dashboard.blog.zerops.ir`)"
+        - "traefik.http.routers.traefik-secure.tls=true"
+        - "traefik.http.routers.traefik-secure.tls.options=default"
+        #- "traefik.http.routers.traefik-secure.middlewares=web-auth"
+        - "traefik.http.routers.traefik-secure.tls.certresolver=mycert"
+        - "traefik.http.services.traefik.loadbalancer.server.port=8080"

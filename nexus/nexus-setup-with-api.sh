@@ -3,19 +3,19 @@
 # Variable section
 ADMIN_USERNAME="admin"
 ADMIN_PASSWORD="<NEXUS_ADMIN_PASSWORD>"
-NEXUS_URL="https://repo.mecan.ir"
+NEXUS_URL="https://repo.blog.zerops.ir"
 
 # New user information
 REPO_USERNAME="repo"
 REPO_PASSWORD="<NEXUS_REPO_PASSWORD>"
 REPO_EMAIL="ahmad@MeCan.ir"
 
-# Minio information
-MINIO_ACCESS_KEY=<MINIO_ACCESS_KEY>
-MINIO_SECRET_KEY=<MINIO_SECRET_KEY>
-MINIO_ENDPOINT_URL=https://io.repository.mecan.ir
-MINIO_DOCKER_BLOBSTORE_BUCKET_NAME=nexus-docker-blob
-MINIO_APT_BLOBSTORE_BUCKET_NAME=nexus-apt-blob
+# # Minio information
+# MINIO_ACCESS_KEY=<MINIO_ACCESS_KEY>
+# MINIO_SECRET_KEY=<MINIO_SECRET_KEY>
+# MINIO_ENDPOINT_URL=https://io.repository.mecan.ir
+# MINIO_DOCKER_BLOBSTORE_BUCKET_NAME=nexus-docker-blob
+# MINIO_APT_BLOBSTORE_BUCKET_NAME=nexus-apt-blob
 
 # blob store name
 DOCKER_BLOB_STORE_NAME=docker
