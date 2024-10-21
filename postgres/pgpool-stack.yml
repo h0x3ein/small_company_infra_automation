@@ -3,10 +3,10 @@ version: '3.9'
 services:
   pg-0:
     image: bitnami/postgresql-repmgr:14
-    deploy:
-      placement:
-        constraints:
-          - node.role == worker
+    # deploy:
+    #   placement:
+    #     constraints:
+    #       - node.role == worker
     ports:
       - 5432
     volumes:
@@ -26,10 +26,10 @@ services:
 
   pg-1:
     image: bitnami/postgresql-repmgr:14
-    deploy:
-      placement:
-        constraints:
-          - node.role == worker
+    # deploy:
+    #   placement:
+    #     constraints:
+    #       - node.role == worker
     ports:
       - 5432
     volumes:
@@ -49,10 +49,10 @@ services:
 
   db:
     image: bitnami/pgpool:4
-    deploy:
-      placement:
-        constraints:
-          - node.role == worker
+    # deploy:
+    #   placement:
+    #     constraints:
+    #       - node.role == worker
     ports:
       - 5432:5432
     environment:

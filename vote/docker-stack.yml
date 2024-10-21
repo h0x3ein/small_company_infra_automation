@@ -15,24 +15,24 @@ services:
       # Removed unnecessary `REDIS_PASSWORD`
     deploy:
       replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=web_net
-      - traefik.http.routers.vote.rule=Host(`vote.blog.zerops.ir`)
-      - traefik.http.routers.vote.entrypoints=web
-      - traefik.http.routers.vote.service=vote-secure-service
-      - traefik.http.services.vote-secure-service.loadbalancer.server.port=80
+      # placement:
+      #   constraints:
+      #     - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=web_net
+        - traefik.http.routers.vote.rule=Host(`vote.blog.zerops.ir`)
+        - traefik.http.routers.vote.entrypoints=http
+        - traefik.http.routers.vote.service=vote-secure-service
+        - traefik.http.services.vote-secure-service.loadbalancer.server.port=80
 
-      - traefik.http.routers.vote.middlewares=redirect-to-https
-      - traefik.http.routers.vote-secure.entrypoints=secure
-      - traefik.http.routers.vote-secure.rule=Host(`vote.blog.zerops.ir`)
-      - traefik.http.routers.vote-secure.tls=true
-      - traefik.http.routers.vote-secure.tls.options=default
-      - traefik.http.routers.vote-secure.service=vote-secure-service
-      - traefik.http.routers.vote-secure.tls.certresolver=mycert
+        - traefik.http.routers.vote.middlewares=https-redirect
+        - traefik.http.routers.vote-secure.entrypoints=https
+        - traefik.http.routers.vote-secure.rule=Host(`vote.blog.zerops.ir`)
+        - traefik.http.routers.vote-secure.tls=true
+        - traefik.http.routers.vote-secure.tls.options=default
+        - traefik.http.routers.vote-secure.service=vote-secure-service
+        - traefik.http.routers.vote-secure.tls.certresolver=mycert
 
   result:
     image: h0x3ein/examplevotingapp_result
@@ -47,24 +47,24 @@ services:
       - POSTGRES_DB=voting_app
     deploy:
       replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=web_net
-      - traefik.http.routers.result.rule=Host(`result.blog.zerops.ir`)
-      - traefik.http.routers.result.entrypoints=web
-      - traefik.http.routers.result.service=result-secure-service
-      - traefik.http.services.result-secure-service.loadbalancer.server.port=80
+      # placement:
+      #   constraints:
+      #     - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=web_net
+        - traefik.http.routers.result.rule=Host(`result.blog.zerops.ir`)
+        - traefik.http.routers.result.entrypoints=http
+        - traefik.http.routers.result.service=result-secure-service
+        - traefik.http.services.result-secure-service.loadbalancer.server.port=80
 
-      - traefik.http.routers.result.middlewares=redirect-to-https
-      - traefik.http.routers.result-secure.entrypoints=secure
-      - traefik.http.routers.result-secure.rule=Host(`result.blog.zerops.ir`)
-      - traefik.http.routers.result-secure.tls=true
-      - traefik.http.routers.result-secure.tls.options=default
-      - traefik.http.routers.result-secure.service=result-secure-service
-      - traefik.http.routers.result-secure.tls.certresolver=mycert
+        - traefik.http.routers.result.middlewares=https-redirect
+        - traefik.http.routers.result-secure.entrypoints=https
+        - traefik.http.routers.result-secure.rule=Host(`result.blog.zerops.ir`)
+        - traefik.http.routers.result-secure.tls=true
+        - traefik.http.routers.result-secure.tls.options=default
+        - traefik.http.routers.result-secure.service=result-secure-service
+        - traefik.http.routers.result-secure.tls.certresolver=mycert
 
   worker:
     image: h0x3ein/examplevotingapp_worker
@@ -78,9 +78,23 @@ services:
       - POSTGRES_DB=voting_app
     deploy:
       replicas: 1
+      # placement:
+      #   constraints:
+      #     - node.role == manager
+
+  visualizer:
+    image: dockersamples/visualizer
+    ports:
+      - "8080:8080"
+    stop_grace_period: 30s
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    # network:
+    #   - web_net
+    deploy:
       placement:
-        constraints:
-          - node.role == manager
+        constraints: [node.role == manager]
+
 
 networks:
   internal-network:  # Single internal network for Redis and PostgreSQL clustering

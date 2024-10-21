@@ -7,7 +7,22 @@ services:
       mode: replicated
       placement:
         constraints:
-          - node.role == manager 
+        - node.labels.ha == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web_net"
+        - "traefik.http.routers.haproxy.entrypoints=http"
+        - "traefik.http.routers.haproxy.rule=Host(`ha.blog.zerops.ir`)"
+        #- "traefik.http.middlewares.web-auth.basicauth.users=${HAPROXY_AUTH_USER}:${HAPROXY_AUTH_PASS}"
+        #- "traefik.http.routers.haproxy-secure.middlewares=web-auth"
+        - "traefik.http.routers.haproxy.middlewares=https-redirect"
+        - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+        - "traefik.http.routers.haproxy-secure.entrypoints=https"
+        - "traefik.http.routers.haproxy-secure.rule=Host(`ha.blog.zerops.ir`)"
+        - "traefik.http.routers.haproxy-secure.tls=true"
+        - "traefik.http.routers.haproxy-secure.tls.options=default"
+        - "traefik.http.routers.haproxy-secure.tls.certresolver=mycert"
+        - "traefik.http.services.haproxy.loadbalancer.server.port=8080"
       replicas: 1  # Increase for high availability
       restart_policy:
         condition: on-failure
@@ -19,21 +34,6 @@ services:
     networks:
       - web_net           # External access for Traefik routing
       - internal-network  # Internal communication for MySQL, Redis, PostgreSQL
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=web_net
-
-      # HTTP routing for HAProxy stats (Traefik)
-      - traefik.http.routers.haproxy-stats-http.rule=Host(`ha.blog.zerops.ir`)
-      - traefik.http.routers.haproxy-stats-http.entrypoints=web
-      - traefik.http.routers.haproxy-stats-http.middlewares=redirect-to-https
-      - traefik.http.services.haproxy-stats.loadbalancer.server.port=8080
-
-      # HTTPS routing for HAProxy stats (Traefik)
-      - traefik.http.routers.haproxy-stats-https.rule=Host(`ha.blog.zerops.ir`)
-      - traefik.http.routers.haproxy-stats-https.entrypoints=secure
-      - traefik.http.routers.haproxy-stats-https.tls=true
-      - traefik.http.routers.haproxy-stats-https.tls.certresolver=mycert
 
 networks:
   web_net:

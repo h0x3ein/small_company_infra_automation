@@ -27,10 +27,11 @@ services:
     networks:
       - web_net
     deploy:
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
+      mode: 
+        global
+      # placement:
+      #   constraints:
+      #     - node.role == manager
       labels:
       # Enable HTTP for dashboard.blog.zerops.ir
       - "traefik.enable=true"
@@ -50,6 +51,7 @@ services:
 networks:
   web_net:
     external: true
+    name: web_net
 
 volumes:
   traefik-acme:
