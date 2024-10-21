@@ -27,7 +27,7 @@ services:
       - traefik.http.routers.haproxy-stats-http.rule=Host(`ha.blog.zerops.ir`)
       - traefik.http.routers.haproxy-stats-http.entrypoints=web
       - traefik.http.routers.haproxy-stats-http.middlewares=redirect-to-https
-      - traefik.http.services.haproxy-stats.loadbalancer.server.port=8081
+      - traefik.http.services.haproxy-stats.loadbalancer.server.port=8080
 
       # HTTPS routing for HAProxy stats (Traefik)
       - traefik.http.routers.haproxy-stats-https.rule=Host(`ha.blog.zerops.ir`)
