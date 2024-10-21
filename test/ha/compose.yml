@@ -1,0 +1,27 @@
+version: '3.9'
+
+services:
+  haproxy:
+    image: haproxy:latest
+    deploy:
+      mode: replicated
+      replicas: 1  # You can scale as needed
+      placement:
+        constraints:
+          - node.role == manager  # Running HAProxy on manager nodes only
+      restart_policy:
+        condition: on-failure
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg  # Bind your config file
+    networks:
+      - web_net  # Shared network with Traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.haproxy.rule=Host(`ha.blog.zerops.ir`)"
+      - "traefik.http.routers.haproxy.entrypoints=web"
+      - "traefik.http.services.haproxy.loadbalancer.server.port=8080"
+      - "traefik.docker.network=web_net"
+
+networks:
+  web_net:
+    external: true  # Ensure this network is created before deploying

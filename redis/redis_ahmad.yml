@@ -12,6 +12,9 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
       # placement:
       #   constraints:
       #     - node.labels.node == 1
@@ -35,6 +38,9 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
       # placement:
       #   constraints:
           # - node.labels.node == 2
@@ -58,6 +64,9 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
       # placement:
       #   constraints:
       #     - node.labels.node == 3
@@ -86,6 +95,9 @@ services:
     deploy:
       mode: replicated
       replicas: 3
+      placement:
+        constraints:
+          - node.role == worker
       # placement:
       #   max_replicas_per_node: 1
       restart_policy:

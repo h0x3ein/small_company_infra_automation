@@ -2,6 +2,10 @@ version: '3.8'
 
 services:
   mariadb1:
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
     image: bitnami/mariadb-galera:latest
     environment:
       - MARIADB_ROOT_PASSWORD=rootpassword
@@ -20,6 +24,10 @@ services:
 
   mariadb2:
     image: bitnami/mariadb-galera:latest
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
     environment:
       - MARIADB_ROOT_PASSWORD=rootpassword
       - MARIADB_USER=wordpress
@@ -37,6 +45,10 @@ services:
 
   mariadb3:
     image: bitnami/mariadb-galera:latest
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
     environment:
       - MARIADB_ROOT_PASSWORD=rootpassword
       - MARIADB_USER=wordpress

@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  nginx:
+    image: nginx:latest
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - "node.role == worker"    # Ensures Nginx runs on worker1 or worker2
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.nginx.rule=Host(`nginx.blog.zerops.ir`)"
+        - "traefik.http.routers.nginx.entrypoints=web"
+        - "traefik.http.services.nginx.loadbalancer.server.port=80"
+        - "traefik.docker.network=web_net"
+    networks:
+      - web_net
+
+networks:
+  web_net:
+    external: true

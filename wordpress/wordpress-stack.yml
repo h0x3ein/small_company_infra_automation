@@ -9,6 +9,9 @@ services:
     image: wordpress:latest
     deploy:
       replicas: 1
+      placement:
+        constraints:
+          - node.role == manager 
       restart_policy:
         condition: on-failure
     environment:
