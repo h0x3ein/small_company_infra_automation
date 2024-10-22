@@ -1,0 +1,65 @@
+version: "3.8"
+
+networks:
+  web_net:
+    external: true
+    name: web_net
+
+volumes:
+  minio_data:
+    name: minio_data
+
+services:
+  minio:
+    image: quay.io/minio/minio:RELEASE.2023-08-16T20-17-30Z
+    command: server --console-address ":9001" /data
+    container_name: minio
+    hostname: minio
+    restart: always
+    volumes:
+      - minio_data:/data
+    environment:
+      MINIO_ROOT_USER: "admin"
+      MINIO_ROOT_PASSWORD: "adminpassword123"
+      MINIO_SERVER_URL: "https://api.blog.zerops.ir"
+      MINIO_BROWSER_REDIRECT_URL: "https://object.blog.zerops.ir"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - web_net
+    deploy:
+      labels:
+        # HTTP router for object.blog.zerops.ir (Minio Console)
+        - traefik.enable=true
+        - traefik.docker.network=web_net
+        - traefik.http.routers.object.rule=Host(`object.blog.zerops.ir`)
+        - traefik.http.routers.object.entrypoints=http
+        - traefik.http.routers.object.service=object-secure-service
+        - traefik.http.services.object-secure-service.loadbalancer.server.port=9001
+
+        # HTTPS router for object.blog.zerops.ir (Minio Console)
+        - traefik.http.routers.object.middlewares=https-redirect
+        - traefik.http.routers.object-secure.entrypoints=https
+        - traefik.http.routers.object-secure.rule=Host(`object.blog.zerops.ir`)
+        - traefik.http.routers.object-secure.tls=true
+        - traefik.http.routers.object-secure.tls.options=default
+        - traefik.http.routers.object-secure.service=object-secure-service
+        - traefik.http.routers.object-secure.tls.certresolver=mycert
+
+        # HTTP router for api.blog.zerops.ir (Minio API)
+        - traefik.http.routers.api.rule=Host(`api.blog.zerops.ir`)
+        - traefik.http.routers.api.entrypoints=http
+        - traefik.http.routers.api.service=api-secure-service
+        - traefik.http.services.api-secure-service.loadbalancer.server.port=9000
+
+        # HTTPS router for api.blog.zerops.ir (Minio API)
+        - traefik.http.routers.api.middlewares=https-redirect
+        - traefik.http.routers.api-secure.entrypoints=https
+        - traefik.http.routers.api-secure.rule=Host(`api.blog.zerops.ir`)
+        - traefik.http.routers.api-secure.tls=true
+        - traefik.http.routers.api-secure.tls.options=default
+        - traefik.http.routers.api-secure.service=api-secure-service
+        - traefik.http.routers.api-secure.tls.certresolver=mycert

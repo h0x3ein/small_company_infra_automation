@@ -32,8 +32,11 @@ deploy_stacks() {
     echo "Deploying MariaDB Galera stack..."
     docker stack deploy -c ./mariadb/mariadb-stack.yml mariadb 
 
-    #echo "Deploying Nexus stack..."
+    echo "Deploying Nexus stack..."
     docker stack deploy -c ./nexus/docker-compose.yml nexus 
+
+    echo "Deploying Minio stack..."
+    docker stack deploy -c minio/docker-compose.yml minio
 
     echo "Deploying PostgreSQL (pgpool) stack..."
     docker stack deploy -c ./postgres/pgpool-stack.yml postgres 
@@ -66,6 +69,9 @@ remove_stacks() {
 
     echo "Removing Nexus stack..."
     docker stack rm nexus
+
+    echo "Removing Minio stack..."
+    docker stack rm minio
 
     echo "Removing MariaDB Galera stack..."
     docker stack rm mariadb
