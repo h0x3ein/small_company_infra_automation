@@ -1,4 +1,9 @@
 ---
+- name: add mecan recpo
+  import_tasks: apt_repo.yml
+  tags: repo
+
+
 - name: Initial configuration
   import_tasks: initial_config.yml
   tags: initial_config

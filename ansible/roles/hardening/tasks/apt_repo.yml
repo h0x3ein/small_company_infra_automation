@@ -1,0 +1,36 @@
+---
+- name: Remove all files in /etc/apt/sources.list.d/
+  file:
+    path: /etc/apt/sources.list.d/
+    state: absent
+
+- name: Recreate the directory /etc/apt/sources.list.d/
+  file:
+    path: /etc/apt/sources.list.d/
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Copy mecan.list to /etc/apt/sources.list.d/
+  copy:
+    src: etc/apt/sources.list.d/Mecan.list
+    dest: /etc/apt/sources.list.d/Mecan.list
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Import GPG keys for repositories
+  apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: "{{ item }}"
+  loop:
+    - '0E98404D386FA1D9'
+    - '6ED0E7B82643E131'
+    - 'F8D2585B8783D481'
+    - '54404762BBB6E853'
+    - 'BDE6D2B9216EC7A8'
+    
+- name: Update APT package list
+  apt:
+    update_cache: yes

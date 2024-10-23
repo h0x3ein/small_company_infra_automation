@@ -1,0 +1,4 @@
+deb https://repo.mecan.ir/repository/debian/ bookworm main
+deb https://repo.mecan.ir/repository/debian/ bookworm-updates main
+deb https://repo.mecan.ir/repository/debian/ bookworm-backports main
+deb https://repo.mecan.ir/repository/debian-security/ bookworm-security main
